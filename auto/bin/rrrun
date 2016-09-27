@@ -1,4 +1,4 @@
 #!/bin/bash
            /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/bin/java -version 
                           echo 
-           /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/bin/java -javaagent:/Users/kongposhsapru/Desktop/rrlatest/RoadRunner-eso-tool/build/jar/rragent.jar $JVM_ARGS -Xbootclasspath/p:/Users/kongposhsapru/Desktop/rrlatest/RoadRunner-eso-tool/classes:/Users/kongposhsapru/Desktop/rrlatest/RoadRunner-eso-tool/jars/hamcrest.jar:/Users/kongposhsapru/Desktop/rrlatest/RoadRunner-eso-tool/jars/java-cup-11a.jar:/Users/kongposhsapru/Desktop/rrlatest/RoadRunner-eso-tool/jars/junit.jar: rr.RRMain $*
+           /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/bin/java -javaagent:/Users/kongposhsapru/opt/masters_playground/threadscout/build/jar/rragent.jar $JVM_ARGS -Xbootclasspath/p:/Users/kongposhsapru/opt/masters_playground/threadscout/classes:/Users/kongposhsapru/opt/masters_playground/threadscout/jars/hamcrest.jar:/Users/kongposhsapru/opt/masters_playground/threadscout/jars/java-cup-11a.jar:/Users/kongposhsapru/opt/masters_playground/threadscout/jars/junit.jar: rr.RRMain $*

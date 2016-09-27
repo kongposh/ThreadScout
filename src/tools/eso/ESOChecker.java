@@ -27,15 +27,15 @@ import tools.util.CV;
 
 @Abbrev("ESO")
 public class ESOChecker extends Tool {
-	
+
 	private static final int CV_INIT_SIZE = 2;
 
 	private static final ErrorMessage<MethodInfo> violations = ErrorMessages.makeMethodErrorMessage("ESOViolations");
-	
+
 	private static Collection<ClassInfo> classes;
 
 	private final Map<Object, CV> esoData = new WeakHashMap<>();
-	
+
 	private final Decoration<ShadowLock, CV> esoLockData = makeLockDecoration("ESO:ShadowLock", new CV(CV_INIT_SIZE));
 
 	static CV ts_get_cv(ShadowThread ts) {
@@ -49,6 +49,7 @@ public class ESOChecker extends Tool {
 
 	public ESOChecker(String name, Tool next, CommandLine commandLine) {
 		super(name, next, commandLine);
+		Util.error("********llll**********");
 		classes = new ArrayList<>();
 	}
 
@@ -130,7 +131,7 @@ public class ESOChecker extends Tool {
 	private boolean isInstance(MethodEvent me) {
 		return !me.getInfo().isStatic() && me.getTarget() != null;
 	}
-	
+
 	private void reportContractViolation(MethodEvent me) {
 		Util.printf("\nContract Violation: %s\n", me + "  by thread " + me.getThread().getTid());
 		violations.error(me.getThread(), me.getInfo(), "ContractViolated", "ESO");

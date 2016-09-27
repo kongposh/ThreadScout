@@ -44,6 +44,7 @@ import rr.event.AcquireEvent;
 import rr.event.InterruptEvent;
 import rr.event.InterruptedEvent;
 import rr.event.JoinEvent;
+import rr.event.NewThreadEvent;
 import rr.event.NotifyEvent;
 import rr.event.ReleaseEvent;
 import rr.event.SleepEvent;
@@ -53,12 +54,13 @@ import rr.state.ShadowThread;
 import rr.state.ShadowVar;
 import rr.tool.Tool;
 import acme.util.StringMatchResult;
+import acme.util.Util;
 import acme.util.option.CommandLine;
 import acme.util.option.CommandLineOption;
 
 /**
- * Like LastTool, but keeps ShadowVar set to thread, so that
- * the fast path in the Instrumenter is triggered.
+ * Like LastTool, but keeps ShadowVar set to thread, so that the fast path in
+ * the Instrumenter is triggered.
  * 
  * Use this only for performance tests.
  */
@@ -84,45 +86,76 @@ final public class EmptyTool extends Tool {
 	public final void access(AccessEvent fae) {
 	}
 
-	// Does not handle enter/exit, so that the instrumentor won't instrument method invocations.  
-	//	public void enter(MethodEvent me) {}
-	//	public void exit(MethodEvent me) {}	
-	
-	@Override
-	public void acquire(AcquireEvent ae) {}	
-	@Override
-	public void release(ReleaseEvent re) {}
-	@Override
-	public boolean testAcquire(AcquireEvent ae) { return true; }	
-	@Override
-	public boolean testRelease(ReleaseEvent re) { return true; }
-	@Override
-	public void preWait(WaitEvent we) {}
-	@Override
-	public void postWait(WaitEvent we) {}
-	@Override
-	public void preNotify(NotifyEvent ne) {}
-	@Override
-	public void postNotify(NotifyEvent ne) {}
-	@Override
-	public void preSleep(SleepEvent e) {}
-	@Override
-	public void postSleep(SleepEvent e) {}	
-	@Override
-	public void preJoin(JoinEvent je) {}
-	@Override
-	public void postJoin(JoinEvent je) {}
-	@Override
-	public void preStart(StartEvent se) {}
-	@Override
-	public void postStart(StartEvent se) {}
-	
-	@Override
-	public void interrupted(InterruptedEvent e) { }
+	// Does not handle enter/exit, so that the instrumentor won't instrument
+	// method invocations.
+	// public void enter(MethodEvent me) {}
+	// public void exit(MethodEvent me) {}
 
 	@Override
-	public void preInterrupt(InterruptEvent me) { }
+	public void acquire(AcquireEvent ae) {
+	}
 
+	@Override
+	public void release(ReleaseEvent re) {
+	}
+
+	@Override
+	public boolean testAcquire(AcquireEvent ae) {
+		return true;
+	}
+
+	@Override
+	public boolean testRelease(ReleaseEvent re) {
+		return true;
+	}
+
+	@Override
+	public void preWait(WaitEvent we) {
+	}
+
+	@Override
+	public void postWait(WaitEvent we) {
+	}
+
+	@Override
+	public void preNotify(NotifyEvent ne) {
+	}
+
+	@Override
+	public void postNotify(NotifyEvent ne) {
+	}
+
+	@Override
+	public void preSleep(SleepEvent e) {
+	}
+
+	@Override
+	public void postSleep(SleepEvent e) {
+	}
+
+	@Override
+	public void preJoin(JoinEvent je) {
+	}
+
+	@Override
+	public void postJoin(JoinEvent je) {
+	}
+
+	@Override
+	public void preStart(StartEvent se) {
+	}
+
+	@Override
+	public void postStart(StartEvent se) {
+	}
+
+	@Override
+	public void interrupted(InterruptedEvent e) {
+	}
+
+	@Override
+	public void preInterrupt(InterruptEvent me) {
+	}
 
 	public static boolean readFastPath(ShadowVar vs, ShadowThread ts) {
 		return true;
@@ -130,5 +163,12 @@ final public class EmptyTool extends Tool {
 
 	public static boolean writeFastPath(ShadowVar vs, ShadowThread ts) {
 		return true;
+	}
+
+	@Override
+	public void create(NewThreadEvent e) {
+		// TODO Auto-generated method stub
+		super.create(e);
+		Util.printf("in empty", "done!");
 	}
 }
