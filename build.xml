@@ -204,7 +204,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<target name="clean-build" depends="clean,wc,compile,jar,agent,javadoc" />
 
 	<target name="run-test" depends="compile,jar,agent">
-		<exec executable="build/bin/rrrun" output="dev/log.txt" logerror="true">
+		<exec executable="build/bin/rrrun" logerror="true">
 			<env key="RR_TOOLPATH" path="jars/java-cup-11a.jar" />
 			<arg value="-classpath=classes-test:jars/junit.jar:jars/hamcrest.jar" />
 			<arg value="-tool=THREADSCOUT" />

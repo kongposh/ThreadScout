@@ -1,5 +1,9 @@
 package tools.threadscout;
-
+/**
+ * 
+ * @author kongposhsapru
+ * @see http://tutorials.jenkov.com/java-concurrency/semaphores.html
+ */
 public class BoundedSemaphore {
 	private int signals = 0;
 	private int bound = 0;
