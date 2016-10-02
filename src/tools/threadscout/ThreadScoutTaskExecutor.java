@@ -1,8 +1,5 @@
 package tools.threadscout;
 
-import java.io.PrintWriter;
-
-import acme.util.Util;
 import acme.util.option.CommandLine;
 import rr.annotations.Abbrev;
 import rr.event.NewThreadEvent;
@@ -13,10 +10,11 @@ public class ThreadScoutTaskExecutor extends Tool {
 
 	public ThreadScoutTaskExecutor(String name, Tool next, CommandLine commandLine) {
 		super(name, next, commandLine);
-		PrintWriter pw = new PrintWriter(System.out);
-		Util.setOut(pw);
-		pw.write("ThreadScout PW");
-		Util.error("ThreadScout Tool initialized");
+
+		System.out.println("Inside Thread Scout tool!");
+		TSController controller = new TSController();
+		controller.start();
+		// System.out.println("ThredScoutTool Created");
 		// TODO Auto-generated constructor stub
 	}
 
@@ -24,8 +22,15 @@ public class ThreadScoutTaskExecutor extends Tool {
 	public void create(NewThreadEvent e) {
 		// TODO Auto-generated method stub
 		super.create(e);
-		System.out.println("Inside On Create");
-		Util.error("Thread created");
+		try {
+			System.out.println("Inside On Create: " + e.getThread().getTid());
+			System.out.println("Thread L finished its job");
+			System.out.println("Thread L ready to wait");
+			TSGlobalState.l.acquire();
+
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage());
+		}
 	}
 
 }
