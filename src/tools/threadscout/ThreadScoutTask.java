@@ -1,7 +1,11 @@
 package tools.threadscout;
 
-public interface ThreadScoutTask {
+public abstract class ThreadScoutTask {
+	
 
-	public void runTest();
+	public abstract void runTest();
 
+	protected final void qstate() {
+
+	}
 }

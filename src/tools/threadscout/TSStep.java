@@ -3,7 +3,7 @@ package tools.threadscout;
 public class TSStep {
 
 	private Trace trace;
-	private int tid;
+	private String tid;
 	private int numOfSwitches;
 
 	public Trace getTrace() {
@@ -14,11 +14,11 @@ public class TSStep {
 		this.trace = trace;
 	}
 
-	public int getTid() {
+	public String getTid() {
 		return tid;
 	}
 
-	public void setTid(int tid) {
+	public void setTid(String tid) {
 		this.tid = tid;
 	}
 

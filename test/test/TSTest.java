@@ -1,9 +1,20 @@
 package test;
 
-public class TSTest {
+import tools.threadscout.ThreadScoutTask;
 
-	public static void main(String[] args) {
-		int x = 1;
-		System.out.println("QSTATE");
+public class TSTest extends ThreadScoutTask {
+
+	@Override
+	public void runTest() {
+		// TODO Auto-generated method stub
+		System.out.println("Thread 1 called");
+		new  Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				System.out.println("Thread 2 called");
+			}
+		}).start();
 	}
 }
