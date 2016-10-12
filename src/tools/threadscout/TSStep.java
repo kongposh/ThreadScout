@@ -30,4 +30,14 @@ public class TSStep {
 		this.numOfSwitches = numOfSwitches;
 	}
 
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		StringBuilder sb = new StringBuilder();
+		sb.append("TID: " + tid);
+		sb.append("Trace: ");
+		sb.append(trace);
+		return sb.toString();
+	}
+
 }

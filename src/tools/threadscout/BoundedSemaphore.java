@@ -15,20 +15,20 @@ public class BoundedSemaphore {
 		this.status = status;
 	}
 
-	public synchronized void acquire(int status) throws InterruptedException {
-		while (this.signals == bound)
-			wait();
-		this.signals++;
-		this.status = status;
-		this.notify();
-	}
-
-	public synchronized int release() throws InterruptedException {
+	public synchronized int acquire() throws InterruptedException {
 		while (this.signals == 0)
 			wait();
-		this.signals--;
 		int status = this.status;
+		this.signals--;
 		this.notify();
 		return status;
+	}
+
+	public synchronized void release(int status) throws InterruptedException {
+		while (this.signals == bound)
+			wait();
+		this.status = status;
+		this.signals++;
+		this.notify();
 	}
 }

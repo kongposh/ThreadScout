@@ -147,6 +147,7 @@ final public class EmptyTool extends Tool {
 
 	@Override
 	public void postStart(StartEvent se) {
+		super.preStart(se);
 	}
 
 	@Override
@@ -169,6 +170,7 @@ final public class EmptyTool extends Tool {
 	public void create(NewThreadEvent e) {
 		// TODO Auto-generated method stub
 		super.create(e);
-		Util.printf("in empty", "done!");
+		int id = e.getThread().getTid();
+		System.out.println("Thread id is: " + id);
 	}
 }

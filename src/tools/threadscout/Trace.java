@@ -13,4 +13,14 @@ public class Trace {
 	public ArrayList<String> getTrace() {
 		return trace;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (String str : trace) {
+			sb.append(str);
+			sb.append("-->");
+		}
+		return sb.toString();
+	}
 }
