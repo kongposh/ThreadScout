@@ -38,6 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package rr.simple;
 
+import acme.util.decorations.Decoration;
+import acme.util.decorations.DecorationFactory;
+import acme.util.decorations.DefaultValue;
+import acme.util.option.CommandLine;
 import rr.annotations.Abbrev;
 import rr.event.AccessEvent;
 import rr.event.AcquireEvent;
@@ -53,10 +57,7 @@ import rr.event.WaitEvent;
 import rr.state.ShadowThread;
 import rr.state.ShadowVar;
 import rr.tool.Tool;
-import acme.util.StringMatchResult;
-import acme.util.Util;
-import acme.util.option.CommandLine;
-import acme.util.option.CommandLineOption;
+import tools.threadscout.TSThreadDAO;
 
 /**
  * Like LastTool, but keeps ShadowVar set to thread, so that the fast path in
@@ -67,6 +68,18 @@ import acme.util.option.CommandLineOption;
 
 @Abbrev("N")
 final public class EmptyTool extends Tool {
+
+	private Decoration<ShadowThread, TSThreadDAO> tsThreads = ShadowThread.makeDecoration("lc",
+			DecorationFactory.Type.MULTIPLE, new DefaultValue<ShadowThread, TSThreadDAO>() {
+				/**
+				* 
+				*/
+				private static final long serialVersionUID = 8746177266853416672L;
+
+				public TSThreadDAO get(ShadowThread st) {
+					return null;
+				}
+			});
 
 	@Override
 	public String toString() {
@@ -139,10 +152,15 @@ final public class EmptyTool extends Tool {
 
 	@Override
 	public void postJoin(JoinEvent je) {
+		super.postJoin(je);
+		System.out.println(
+				"Joining event called for " + je.getThread().getTid() + " by " + Thread.currentThread().getName());
+		System.out.println("Joining thread id " + je.getJoiningThread().getTid());
 	}
 
 	@Override
 	public void preStart(StartEvent se) {
+
 	}
 
 	@Override
@@ -170,7 +188,37 @@ final public class EmptyTool extends Tool {
 	public void create(NewThreadEvent e) {
 		// TODO Auto-generated method stub
 		super.create(e);
-		int id = e.getThread().getTid();
-		System.out.println("Thread id is: " + id);
+		int rrtid = e.getThread().getTid();
+
+		ShadowThread pt = e.getThread().getParent();
+
+		// try {
+
+		if (rrtid == 0) {
+			TSThreadDAO tsdao = new TSThreadDAO();
+			System.out.println("[CREATE] Thread ID generated for main thread: " + tsdao.getTsThreadId());
+			tsThreads.set(e.getThread(), tsdao);
+			return;
+		}
+		int prrtid = e.getThread().getParent().getTid();
+		System.out.println("[CREATE] Create called for " + e.getThread().getTid() + " by "
+				+ Thread.currentThread().getName() + " having parent id: " + prrtid);
+		TSThreadDAO tsDao = new TSThreadDAO();
+		TSThreadDAO ptsDao = tsThreads.get(pt);
+		String pid = ptsDao.getTsThreadId();
+		// int tid = pid * 10 + 1;
+		// System.out.println("[CREATE] Created id " + tid + " for thread having
+		// rrid " + rrtid);
+		// tsDao.setTsThreadId(tid);
+
+		tsThreads.set(e.getThread(), tsDao);
 	}
+
+	@Override
+	public void stop(ShadowThread td) {
+		// TODO Auto-generated method stub
+		super.stop(td);
+		System.out.println("Stop called for " + td.getTid() + " by thread " + Thread.currentThread().getName());
+	}
+
 }

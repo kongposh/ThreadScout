@@ -1,5 +1,7 @@
 package test;
 
+import tools.threadscout.TSGlobalState;
+
 public class TSRunner {
 
 	public static void main(String[] args) {
@@ -22,21 +24,19 @@ public class TSRunner {
 							}
 						});
 						t2.start();
-						// try {
-						// Thread.currentThread().join();
-						// } catch (InterruptedException e) {
-						// // TODO Auto-generated catch block
-						// e.printStackTrace();
-						// }
-
 					}
+
 				});
 				nt.start();
 				// System.exit(0);
 				nt.join();
+				// TSGlobalState.globalLock.release(2);
 			}
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 }

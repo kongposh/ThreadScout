@@ -135,14 +135,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	<target name="props" depends="">
 		<javac classpathref="rr.classpath" srcdir="${src.dir}/tools">
-		  <compilerarg value="-proc:only" />
-		  <compilerarg value="-XDignore.symbol.file" />
+			<compilerarg value="-proc:only" />
+			<compilerarg value="-XDignore.symbol.file" />
 		</javac>
 		<move file="rrtools.properties" todir="${classes.dir}/tools" />
 
 		<javac classpathref="rr.classpath" srcdir="${src.dir}/rr/simple">
-		  <compilerarg value="-proc:only" />
-		  <compilerarg value="-XDignore.symbol.file" />
+			<compilerarg value="-proc:only" />
+			<compilerarg value="-XDignore.symbol.file" />
 		</javac>
 		<move file="rrtools.properties" todir="${classes.dir}/rr/simple" />
 		<concat destfile="${classes.dir}/rrtools.properties">
@@ -208,7 +208,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			<env key="RR_TOOLPATH" path="jars/java-cup-11a.jar" />
 			<arg value="-classpath=classes-test:jars/junit.jar:jars/hamcrest.jar" />
 			<arg value="-tool=THREADSCOUT" />
-			<arg value="test.TSTest" />
+			<arg value="test.TSRunner" />
 		</exec>
 	</target>
 </project>

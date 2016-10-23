@@ -34,8 +34,8 @@ public class TSStep {
 	public String toString() {
 		// TODO Auto-generated method stub
 		StringBuilder sb = new StringBuilder();
-		sb.append("TID: " + tid);
-		sb.append("Trace: ");
+		sb.append("TID: " + tid + "\n");
+		sb.append("Trace: " + "\n");
 		sb.append(trace);
 		return sb.toString();
 	}
