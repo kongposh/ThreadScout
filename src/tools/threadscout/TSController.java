@@ -1,6 +1,5 @@
 package tools.threadscout;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 public class TSController extends Thread {
@@ -15,9 +14,13 @@ public class TSController extends Thread {
 				System.out.println(
 						"---------------------------------- New task from Q ---------------------------------");
 				TSGlobalState.printGlobalState();
-				System.out.println("[CONTROLLER] Controller is waiting on the 1st step");
-				TSGlobalState.globalLock.acquire("controller");
-				System.out.println("[CONTROLLER] Controller wokeup from the 1st step");
+				// System.out.println("[CONTROLLER] Controller is waiting on the
+				// 1st step");
+				// BoundedSemaphore firstStepSem =
+				// TSGlobalState.lockMap.get("11@1");
+				// firstStepSem.transfer(0, "controller");
+				// System.out.println("[CONTROLLER] Controller wokeup from the
+				// 1st step");
 
 				System.out.println("[CONTROLLER] Controller is taking item from Q");
 				int status = 0;
@@ -27,52 +30,57 @@ public class TSController extends Thread {
 
 				String tid = step.getTid();
 				System.out.println("[CONTROLLER] Current step thread is: " + tid);
-				Trace trace = step.getTrace();
+				String trace = step.getTrace();
 				System.out.println("[CONTROLLER] Trace till current step: " + trace);
-				ArrayList<String> traceIds = trace.getTrace();
-				if (traceIds.size() > 0) {
-					System.out.println("[CONTROLLER] -- Executing past trace -- ");
-					for (String traceId : traceIds) {
-						System.out.println("[CONTROLLER] Trying to wakeup thread " + traceId);
-						BoundedSemaphore sem = TSGlobalState.lockMap.get(traceId);
-						sem.release(0, "controller --> " + traceId);
-						System.out.println("[CONTROLLER] Waiting on the global lock");
-						int execstatus = TSGlobalState.globalLock.acquire("controller");
-						System.out.println("[CONTROLLER] Controller wokeup");
+				if (trace != null) {
+					String[] traceIds = trace.split(">");
+					System.out.println("{CONTROLLER] Size is: " + traceIds.length);
+					if (traceIds.length > 0) {
+						System.out.println("[CONTROLLER] -- Executing past trace -- ");
+						for (String traceId : traceIds) {
+							System.out.println("[CONTROLLER] Transfer control to thread " + traceId);
+							BoundedSemaphore sem = TSGlobalState.lockMap.get(traceId);
+							if (sem.getCompletionStatus() == 3) {
+								sem.setCompletionStatus(4);
+								sem.complete("controller -- > " + traceId);
+							} else
+								sem.transfer(0, "controller --> " + traceId);
+							System.out.println("[CONTROLLER] Transfer back to controller");
+						}
 					}
+				} else {
+					System.out.println("[CONTROLLER] No past trace");
 				}
-				while (TSGlobalState.isQState()) {
+				while (!TSGlobalState.isQState()) {
 					System.out.println("[CONTROLLER] --- Add new steps to trace --- ");
 					System.out.println("[CONTROLLER] Current step thread is: " + tid);
-					System.out.println("[CONTROLLER] Waking thread " + tid + " up");
 
 					if (TSGlobalState.getTids().size() != 0) {
 						BoundedSemaphore sem = TSGlobalState.lockMap.get(tid);
 						System.out.println("[CONTROLLER] Completion status value is: " + sem.getCompletionStatus());
-						if (sem != null && sem.getCompletionStatus() != 4) {
 
-							if (sem.getCompletionStatus() == 3) {
-								sem.setCompletionStatus(4);
-							}
-							sem.release(0, "controller --> " + tid);
-						} else {
+						if (sem.getCompletionStatus() == 4) {
 							String ntid = TSGlobalState.getNewThread();
 							System.out.println("[CONTROLLER] Changing tid from " + tid + " to " + ntid);
 							tid = ntid;
 							continue;
-							// sem = TSGlobalState.lockMap.get(tid);
-							// sem.release(0);
 						}
-						System.out.println("[CONTROLLdER] Controller ready to wait");
-						status = TSGlobalState.globalLock.acquire("controller");
-						System.out.println("[CONTROLLER] Controller wokeup");
-						trace.addTid(tid);
 
+						if (sem.getCompletionStatus() == 3) {
+							sem.setCompletionStatus(4);
+							TSGlobalState.lockMap.get(tid).complete("Controller --> " + tid);
+						} else {
+							System.out.println("[Controller] Transfer control to thread " + tid);
+							sem.transfer(0, "controller --> " + tid);
+						}
+						if (trace == null)
+							trace = tid;
+						else
+							trace = trace + ">" + tid;
 						Set<String> tids = TSGlobalState.getTids();
 						for (String t : tids) {
-							System.out.print(t + " --- ");
-						}
-						for (String t : tids) {
+							if (TSGlobalState.lockMap.get(t).getCompletionStatus() == 4)
+								continue;
 							if (t.equals(tid))
 								continue;
 							TSStep s = new TSStep();
@@ -91,7 +99,9 @@ public class TSController extends Thread {
 			}
 			System.out.println("[CONTROLLER] EXITING THREADSCOUT ");
 			System.exit(0);
-		} catch (Exception e)
+		} catch (
+
+		Exception e)
 
 		{
 			e.printStackTrace();

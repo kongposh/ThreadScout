@@ -2,15 +2,15 @@ package tools.threadscout;
 
 public class TSStep {
 
-	private Trace trace;
+	private String trace;
 	private String tid;
 	private int numOfSwitches;
 
-	public Trace getTrace() {
+	public String getTrace() {
 		return trace;
 	}
 
-	public void setTrace(Trace trace) {
+	public void setTrace(String trace) {
 		this.trace = trace;
 	}
 

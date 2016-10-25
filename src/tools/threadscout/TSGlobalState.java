@@ -25,7 +25,8 @@ public class TSGlobalState {
 	}
 
 	public static Set<String> getTids() {
-		Set<String> keySet = lockMap.keySet();
+		Set<String> keySet = lockMap.keySet()
+				;
 		return keySet;
 	}
 
@@ -33,9 +34,12 @@ public class TSGlobalState {
 		Set<String> set = lockMap.keySet();
 		ArrayList<String> arr = new ArrayList(set);
 		Random random = new Random();
-		int val = random.nextInt(arr.size());
-		String key = arr.get(val);
-		return key;
+		while (true) {
+			int val = random.nextInt(arr.size());
+			String key = arr.get(val);
+			if (lockMap.get(key).getCompletionStatus() != 4)
+				return key;
+		}
 	}
 
 	public static boolean isQState() {
@@ -43,7 +47,8 @@ public class TSGlobalState {
 		Set<String> keys = lockMap.keySet();
 		for (String str : keys) {
 			BoundedSemaphore sem = lockMap.get(str);
-			if (sem.getCompletionStatus() == 4)
+			System.out.println("[CHECK QSTATE] The completion status is: " + sem.getCompletionStatus());
+			if (sem.getCompletionStatus() != 4)
 				return false;
 		}
 		return true;
