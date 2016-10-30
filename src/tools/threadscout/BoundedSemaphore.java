@@ -75,16 +75,16 @@ public class BoundedSemaphore {
 	}
 
 	public synchronized void transfer(int status, String name) throws Exception {
-		System.out.println("[transfer] " + name + " read to wait");
+		//System.out.println("[transfer] " + name + " read to wait");
 		this.notify();
 		this.wait();
-		System.out.println("[transfer] " + name + " wokeup");
+		//System.out.println("[transfer] " + name + " wokeup");
 	}
 
 	public synchronized void complete(String name) throws Exception {
 
 		if (completionStatus == 4) {
-			System.out.println("[COMPLETE] Notification to complete : " + name);
+			//System.out.println("[COMPLETE] Notification to complete : " + name);
 			notify();
 		}
 	}

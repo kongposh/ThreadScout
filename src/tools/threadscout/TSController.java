@@ -45,14 +45,14 @@ public class TSController extends Thread {
 								sem.complete("controller -- > " + traceId);
 							} else
 								sem.transfer(0, "controller --> " + traceId);
-							System.out.println("[CONTROLLER] Transfer back to controller");
+							System.out.println("[CONTROLLER] Transfer back to controller by " + traceId);
 						}
 					}
 				} else {
 					System.out.println("[CONTROLLER] No past trace");
 				}
 				while (!TSGlobalState.isQState()) {
-					System.out.println("[CONTROLLER] --- Add new steps to trace --- ");
+					System.out.println("[CONTROLLER] *************************************** Add new steps to trace --- ");
 					System.out.println("[CONTROLLER] Current step thread is: " + tid);
 
 					if (TSGlobalState.getTids().size() != 0) {
@@ -86,7 +86,7 @@ public class TSController extends Thread {
 							TSStep s = new TSStep();
 							s.setTrace(trace);
 							s.setTid(t);
-							System.out.println("[CONTROLLER] The step being added is: " + s);
+							System.out.println("[CONTROLLER] *************************************************************The step being added is: " + s);
 							TSGlobalState.workQ.offer(s);
 						}
 					}
