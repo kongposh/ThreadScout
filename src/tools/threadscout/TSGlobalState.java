@@ -25,8 +25,7 @@ public class TSGlobalState {
 	}
 
 	public static Set<String> getTids() {
-		Set<String> keySet = lockMap.keySet()
-				;
+		Set<String> keySet = lockMap.keySet();
 		return keySet;
 	}
 

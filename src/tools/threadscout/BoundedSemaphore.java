@@ -74,19 +74,48 @@ public class BoundedSemaphore {
 
 	}
 
-	public synchronized void transfer(int status, String name) throws Exception {
-		//System.out.println("[transfer] " + name + " read to wait");
-		this.notify();
-		this.wait();
-		//System.out.println("[transfer] " + name + " wokeup");
-	}
+	// public synchronized void transfer(int status, String name) throws
+	// Exception {
+	// //System.out.println("[transfer] " + name + " read to wait");
+	// this.notify();
+	// this.wait();
+	// //System.out.println("[transfer] " + name + " wokeup");
+	// }
 
 	public synchronized void complete(String name) throws Exception {
 
 		if (completionStatus == 4) {
-			//System.out.println("[COMPLETE] Notification to complete : " + name);
+			// System.out.println("[COMPLETE] Notification to complete : " +
+			// name);
 			notify();
 		}
+	}
+
+	public synchronized void get(String name) throws Exception {
+		System.out.println("[TRANSFER - GET] " + name);
+		while (this.signals < bound) {
+			wait();
+		}
+
+	}
+
+	public synchronized void notifyGet(String name) throws Exception {
+		System.out.println("[TRANSFER - NOTIFY GET] " + name);
+		signals--;
+		notify();
+	}
+
+	public synchronized void put(String name) throws Exception {
+		System.out.println("[TRANSFER - PUT] " + name);
+		while (this.signals == bound) {
+			wait();
+		}
+	}
+
+	public synchronized void notifyPut(String name) throws Exception {
+		System.out.println("[TRANSFER - NOTIFY PUT] " + name);
+		signals++;
+		notify();
 	}
 
 	// public synchronized int transferControl(int status, String name) throws

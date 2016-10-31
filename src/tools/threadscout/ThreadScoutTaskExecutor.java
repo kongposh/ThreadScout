@@ -58,16 +58,16 @@ public class ThreadScoutTaskExecutor extends Tool {
 			System.out.println("[ENTER] Current method name is:" + methodName + " in " + tsdao.getTsThreadId() + " by "
 					+ Thread.currentThread().getName());
 			if (methodName.equals("run")) {
-
-				// me.getThread().getParent();
-
 				if (tid == 0)
 					return;
-
 				TSGlobalState.printGlobalState();
-				System.out.println("[ENTER] Thread " + tsdao.getTsThreadId() + " transfer control to controller");
-				TSGlobalState.lockMap.get(tsdao.getTsThreadId()).transfer(0, tsdao.getTsThreadId());
-				System.out.println("[ENTER] Thread " + tsdao.getTsThreadId() + " wokeup");
+				System.out.println("[ENTER] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint");
+				BoundedSemaphore sem = TSGlobalState.lockMap.get(tsdao.getTsThreadId());
+				sem.put("[Enter] Request for control by " + tsdao.getTsThreadId());
+				System.out.println("[ENTER] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint Completed");
+				sem.notifyPut("[ENTER] Transfer control back to controller by " + tsdao.getTsThreadId());
+				System.out.println("[EXECUTION] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint");
+				sem.put("[EXECUTION] Request for control by " + tsdao.getTsThreadId());
 
 			}
 
@@ -94,13 +94,17 @@ public class ThreadScoutTaskExecutor extends Tool {
 
 				if (tid == 0)
 					return;
-
-				TSGlobalState.printGlobalState();
 				BoundedSemaphore sem = TSGlobalState.lockMap.get(tsdao.getTsThreadId());
+				System.out.println(
+						"[EXECUTION] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint Completed");
+				sem.notifyPut("[EXECUTION] Transfer control to controller by " + tsdao.getTsThreadId());
+				System.out.println("[EXIT] Thread " + tsdao.getTsThreadId() + " Thread Exit Checkpoint");
+				sem.put("[EXIT] Request control from controller by " + tsdao.getTsThreadId());
+				TSGlobalState.printGlobalState();
 				System.out.println("[EXIT] Setting completion status for tid " + tsdao.getTsThreadId());
 				sem.setCompletionStatus(3);
-				System.out.println("[EXIT] Transfer to controller by " + tsdao.getTsThreadId());
-				sem.transfer(0, tsdao.getTsThreadId());
+				System.out.println("[EXIT] Thread " + tsdao.getTsThreadId() + " Thread Exit Checkpoint Completed");
+				sem.notifyPut("[EXIT] Transfer to controller by " + tsdao.getTsThreadId());
 				System.out.println(tsdao.getTsThreadId() + " got control ");
 				if (tsdao.getTsThreadId().equals("11@1")) {
 					System.out.println("[EXIT] TS thread finished execution & waiting on QSTATE lock");
@@ -209,9 +213,6 @@ public class ThreadScoutTaskExecutor extends Tool {
 		// TODO Auto-generated method stub
 		super.create(e);
 		int rrtid = e.getThread().getTid();
-
-		// try {
-
 		if (rrtid == 0) {
 			TSThreadDAO tsdao = new TSThreadDAO();
 			tsdao.setPrefix("1");
@@ -248,28 +249,6 @@ public class ThreadScoutTaskExecutor extends Tool {
 			TSGlobalState.lockMap.put(ctsDao.getTsThreadId(), sem);
 			TSGlobalState.printGlobalState();
 		}
-		// return;
-		// TSGlobalState.printGlobalState();
-		// System.out.println("[CRATE] Creating new semaphore for thread id " +
-		// tid);
-		// BoundedSemaphore sem = new BoundedSemaphore(1, 0);
-		// TSGlobalState.lockMap.put(String.valueOf(tid), sem);
-		// TSGlobalState.printGlobalState();
-		// if (tid == 1) {
-		// System.out.println("[CREATE] Thread 1 Waking controller for the first
-		// time");
-		// TSGlobalState.globalLock.release(0);
-		// System.out.println("[CREATE] Thread " + tid + " ready to wait for
-		// first time");
-		// TSGlobalState.lockMap.get(String.valueOf(tid)).acquire();
-		// System.out.println("[CREATE] Thread " + tid + " wokeup for the first
-		// time");
-		// }
-		// } catch (Exception ex) {
-		// ex.printStackTrace();
-		// System.out.println(ex.getMessage());
-		// }
-
 	}
 
 	// @Override
