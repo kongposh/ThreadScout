@@ -34,7 +34,7 @@ public class ThreadScoutTaskExecutor extends Tool {
 		step.setTrace(trace);
 		step.setTid("11@1");
 		step.setNumOfSwitches(0);
-		BoundedSemaphore sem = new BoundedSemaphore(1, 0);
+		BoundedSemaphore sem = new BoundedSemaphore(1, 0, 1);
 		TSGlobalState.lockMap.put("11@1", sem);
 		TSGlobalState.workQ.offer(step);
 		TSGlobalState.printGlobalState();
@@ -68,7 +68,6 @@ public class ThreadScoutTaskExecutor extends Tool {
 				sem.notifyPut("[ENTER] Transfer control back to controller by " + tsdao.getTsThreadId());
 				System.out.println("[EXECUTION] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint");
 				sem.put("[EXECUTION] Request for control by " + tsdao.getTsThreadId());
-
 			}
 
 			// System.out.println("[ENTER] Extra info" + me.getInfo().);
@@ -102,7 +101,7 @@ public class ThreadScoutTaskExecutor extends Tool {
 				sem.put("[EXIT] Request control from controller by " + tsdao.getTsThreadId());
 				TSGlobalState.printGlobalState();
 				System.out.println("[EXIT] Setting completion status for tid " + tsdao.getTsThreadId());
-				sem.setCompletionStatus(3);
+				sem.setCompletionStatus(4);
 				System.out.println("[EXIT] Thread " + tsdao.getTsThreadId() + " Thread Exit Checkpoint Completed");
 				sem.notifyPut("[EXIT] Transfer to controller by " + tsdao.getTsThreadId());
 				System.out.println(tsdao.getTsThreadId() + " got control ");
@@ -245,9 +244,13 @@ public class ThreadScoutTaskExecutor extends Tool {
 
 		if (!ctsDao.getTsThreadId().equals("11@1")) {
 			System.out.println("[CREATE] Creating new semaphore for thread id " + ctsDao.getTsThreadId());
-			BoundedSemaphore sem = new BoundedSemaphore(1, 0);
+			BoundedSemaphore sem = new BoundedSemaphore(1, 0, 1);
 			TSGlobalState.lockMap.put(ctsDao.getTsThreadId(), sem);
 			TSGlobalState.printGlobalState();
+		} else if (ctsDao.getTsThreadId().equals("11@1")) {
+			System.out.println("[CREATE] Reset completion status of " + ctsDao.getTsThreadId() + " to " + 0);
+			BoundedSemaphore sem = TSGlobalState.lockMap.get(ctsDao.getTsThreadId());
+			sem.setCompletionStatus(0);
 		}
 	}
 

@@ -12,8 +12,8 @@ public class TSGlobalState {
 	public static AtomicBoolean isFirstRun = new AtomicBoolean(true);
 	public static Queue<TSStep> workQ = new LinkedList<TSStep>();
 	public static HashMap<String, BoundedSemaphore> lockMap = new HashMap<String, BoundedSemaphore>();
-	public static BoundedSemaphore globalLock = new BoundedSemaphore(1, 0);
-	public static BoundedSemaphore QStateLock = new BoundedSemaphore(1, 0);
+	public static BoundedSemaphore globalLock = new BoundedSemaphore(1, 0, 0);
+	public static BoundedSemaphore QStateLock = new BoundedSemaphore(1, 0, 0);
 
 	public static void printGlobalState() {
 		System.out.println("---- Global State ----");

@@ -1,7 +1,5 @@
 package test;
 
-import tools.threadscout.TSGlobalState;
-
 public class TSRunner {
 
 	public static void main(String[] args) {
@@ -21,18 +19,18 @@ public class TSRunner {
 							public void run() {
 								// TODO Auto-generated method stub
 								System.out.println("Thread 2 called");
+
+								Thread t3 = new Thread(new Runnable() {
+
+									@Override
+									public void run() {
+										System.out.println("Thread 3 called");
+									}
+								});
+								t3.start();
 							}
 						});
 						t2.start();
-
-						Thread t3 = new Thread(new Runnable() {
-
-							@Override
-							public void run() {
-								System.out.println("Thread 3 called");
-							}
-						});
-						t3.start();
 
 					}
 

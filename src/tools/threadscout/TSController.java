@@ -28,16 +28,16 @@ public class TSController extends Thread {
 						System.out.println("[CONTROLLER] -- Executing past trace -- ");
 						for (String traceId : traceIds) {
 							BoundedSemaphore sem = TSGlobalState.lockMap.get(traceId);
-							sem.get("controller waiting for " + traceId);
-							System.out.println("[CONTROLLER] Controller wokeup by " + traceId);
-							if (sem.getCompletionStatus() == 3)
-								sem.setCompletionStatus(4);
-							sem.notifyGet("Return control to thread " + traceId);
+							sem.notifyGet("[CONTROLLER] controller notifying " + traceId);
+							sem.get("[CONTROLLER] Controller waiting for " + traceId);
 						}
 					}
 				} else {
 					System.out.println("[CONTROLLER] No past trace");
 				}
+				BoundedSemaphore sem1 = TSGlobalState.lockMap.get(tid);
+				sem1.get("[CONTROLLER] Controller take control before adding new steps " + tid);
+				System.out.println("[CONTROLLER] Controller wokeup by " + tid);
 				while (!TSGlobalState.isQState()) {
 					System.out.println(
 							"[CONTROLLER] *************************************** Add new steps to trace --- ");
@@ -53,8 +53,8 @@ public class TSController extends Thread {
 						continue;
 					}
 
-					sem.get("Controller called for control from " + tid);
-					System.out.println("[CONTROLLER] Controller wokeup by " + tid);
+					sem.notifyGet("[CONTROLLER] Controller giving control to " + tid);
+					sem.get("[CONTROLLER] Controller waiting for " + tid + " to finish");
 					System.out.println(
 							"[CONTROLLER] completion status for thread " + tid + " is " + sem.getCompletionStatus());
 
@@ -80,14 +80,12 @@ public class TSController extends Thread {
 										+ s);
 						TSGlobalState.workQ.offer(s);
 					}
-
-					sem.notifyGet("Controller gave control to " + tid);
 				}
 				System.out.println("[CONTROLLER] Waiting for QSTATE LOCK");
 				TSGlobalState.QStateLock.tryAndAct();
 				System.out.println("[CONTROLLER] Waking up from QSTATE LOCK");
-				TSGlobalState.globalLock = new BoundedSemaphore(1, 0);
-				TSGlobalState.QStateLock = new BoundedSemaphore(1, 0);
+				TSGlobalState.globalLock = new BoundedSemaphore(1, 0, 0);
+				TSGlobalState.QStateLock = new BoundedSemaphore(1, 0, 0);
 			}
 
 			System.out.println("[CONTROLLER] EXITING THREADSCOUT ");

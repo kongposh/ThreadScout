@@ -6,7 +6,7 @@ package tools.threadscout;
  * @see http://tutorials.jenkov.com/java-concurrency/semaphores.html
  */
 public class BoundedSemaphore {
-	private int signals = 0;
+	private int signals = 1;
 	private int bound = 0;
 	private int status = 0;
 	private int completionStatus = 0;
@@ -19,9 +19,10 @@ public class BoundedSemaphore {
 		this.completionStatus = status;
 	}
 
-	public BoundedSemaphore(int upperBound, int status) {
+	public BoundedSemaphore(int upperBound, int status, int initialValue) {
 		this.bound = upperBound;
 		this.status = status;
+		this.signals = initialValue;
 	}
 
 	// public synchronized int take(String name) throws InterruptedException {
