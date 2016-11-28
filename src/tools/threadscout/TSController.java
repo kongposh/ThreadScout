@@ -8,7 +8,7 @@ public class TSController extends Thread {
 	public void run() {
 		try {
 			super.run();
-			System.out.println("Controller started");
+			System.out.println("[CONTROLLER] Controller started");
 			while (!TSGlobalState.workQ.isEmpty()) {
 				System.out.println(
 						"---------------------------------- New task from Q ---------------------------------");
@@ -39,8 +39,7 @@ public class TSController extends Thread {
 				sem1.get("[CONTROLLER] Controller take control before adding new steps " + tid);
 				System.out.println("[CONTROLLER] Controller wokeup by " + tid);
 				while (!TSGlobalState.isQState()) {
-					System.out.println(
-							"[CONTROLLER] *************************************** Add new steps to trace --- ");
+					System.out.println("[CONTROLLER] ************ Add new steps to trace ********** ");
 					System.out.println("[CONTROLLER] Current step thread is: " + tid);
 					BoundedSemaphore sem = TSGlobalState.lockMap.get(tid);
 
@@ -59,7 +58,7 @@ public class TSController extends Thread {
 							"[CONTROLLER] completion status for thread " + tid + " is " + sem.getCompletionStatus());
 
 					if (sem.getCompletionStatus() == 3) {
-						sem.setCompletionStatus(4);
+						continue;
 					}
 					if (trace == null)
 						trace = tid;
@@ -72,13 +71,17 @@ public class TSController extends Thread {
 							continue;
 						if (t.equals(tid))
 							continue;
-						TSStep s = new TSStep();
-						s.setTrace(trace);
-						s.setTid(t);
-						System.out.println(
-								"[CONTROLLER] *************************************************************The step being added is: "
-										+ s);
-						TSGlobalState.workQ.offer(s);
+						if (step.getNumOfSwitches() <= 2) {
+							TSStep s = new TSStep();
+							s.setTrace(trace);
+							s.setTid(t);
+							s.setNumOfSwitches(s.getNumOfSwitches() + 1);
+							System.out
+									.println("[CONTROLLER] *********** The step being added is: ****************" + s);
+							TSGlobalState.workQ.offer(s);
+						} else {
+							System.out.println("[CONTROLLER] Number of switches limit reached");
+						}
 					}
 				}
 				System.out.println("[CONTROLLER] Waiting for QSTATE LOCK");

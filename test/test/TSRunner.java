@@ -1,6 +1,9 @@
 package test;
 
 public class TSRunner {
+	private static Object lock = new Object();
+	private static Object lock2 = new Object();
+	private static boolean flag = false;
 
 	public static void main(String[] args) {
 		try {
@@ -9,40 +12,15 @@ public class TSRunner {
 
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
-						// TSTest t = new TSTest();
-						// t.runTest();
-
-						System.out.println("Thread 1 called");
-						Thread t2 = new Thread(new Runnable() {
-							@Override
-							public void run() {
-								// TODO Auto-generated method stub
-								System.out.println("Thread 2 called");
-
-								Thread t3 = new Thread(new Runnable() {
-
-									@Override
-									public void run() {
-										System.out.println("Thread 3 called");
-									}
-								});
-								t3.start();
-							}
-						});
-						t2.start();
-
+						TSTest t = new TSTest();
+						t.runTest();
 					}
 
 				});
 				nt.start();
-				// System.exit(0);
 				nt.join();
-				// TSGlobalState.globalLock.release(2);
 			}
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

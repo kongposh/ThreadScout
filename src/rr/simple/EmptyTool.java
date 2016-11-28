@@ -106,6 +106,10 @@ final public class EmptyTool extends Tool {
 
 	@Override
 	public void acquire(AcquireEvent ae) {
+		// boolean status = testAcquire(ae);
+		super.acquire(ae);
+		// System.out.println("[ACQUIRE]" + ae.getThread().getTid() + "
+		// executing the acquire event with value " + status);
 	}
 
 	@Override
@@ -113,17 +117,31 @@ final public class EmptyTool extends Tool {
 	}
 
 	@Override
-	public boolean testAcquire(AcquireEvent ae) {
-		return true;
+	public boolean testAcquire(AcquireEvent ae){
+		
+		System.out.println("[TEST-ACQUIRE]" + ae.getThread().getTid() + " executing the event");
+		ShadowThread st = ae.getLock().getHoldingThread();
+		if(st == null)
+			System.out.println("hold thread is null");
+		else
+			System.out.println("some thread is holding");
+		boolean status = super.testAcquire(ae);
+		System.out.println("status is " + status);
+		return status;
+		
 	}
 
 	@Override
 	public boolean testRelease(ReleaseEvent re) {
+		System.out.println("[TEST-ACQUIRE]" + re.getThread().getTid() + " executing the event");
 		return true;
 	}
 
 	@Override
 	public void preWait(WaitEvent we) {
+		super.preWait(we);
+		System.out.println("[PREWAIT]" + we.getThread().getTid() + " executing the pre-wait event with value ");
+
 	}
 
 	@Override

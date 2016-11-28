@@ -1,7 +1,6 @@
-package tools.threadscout;
+package test;
 
 public abstract class ThreadScoutTask {
-	
 
 	public abstract void runTest();
 

@@ -62,8 +62,8 @@ import acme.util.option.CommandLine;
 @Abbrev("C")
 final public class CountTool extends Tool {
 
-	private final Counter accessC, volatileAccessC, arrayAccessC, acquireC, releaseC, enterC, exitC, waitC, notifyC, 
-		sleepC, joinC, startC, guardStateC;
+	private final Counter accessC, volatileAccessC, arrayAccessC, acquireC, releaseC, enterC, exitC, waitC, notifyC,
+			sleepC, joinC, startC, guardStateC;
 
 	private static int countToolNum = 0;
 
@@ -127,34 +127,35 @@ final public class CountTool extends Tool {
 	}
 
 	@Override
-	public  void preWait(WaitEvent we) {
+	public void preWait(WaitEvent we) {
 		waitC.inc();
 		super.preWait(we);
 	}
 
 	@Override
-	public  void preNotify(NotifyEvent ne) { 
+	public void preNotify(NotifyEvent ne) {
 		notifyC.inc();
 		super.preNotify(ne);
 	}
 
 	@Override
-	public  void preSleep(SleepEvent e) { 
+	public void preSleep(SleepEvent e) {
 		sleepC.inc();
 		super.preSleep(e);
 	}
 
 	@Override
-	public  void preJoin(JoinEvent je) { 
+	public void preJoin(JoinEvent je) {
 		joinC.inc();
 		super.preJoin(je);
 	}
 
 	@Override
-	public void preStart (StartEvent se) {
+	public void preStart(StartEvent se) {
 		startC.inc();
 		super.preStart(se);
 	}
+
 	@Override
 	public ShadowVar makeShadowVar(AccessEvent fae) {
 		guardStateC.inc();

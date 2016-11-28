@@ -6,10 +6,13 @@ import acme.util.decorations.DefaultValue;
 import acme.util.option.CommandLine;
 import jdk.nashorn.internal.objects.Global;
 import rr.annotations.Abbrev;
+import rr.event.AcquireEvent;
 import rr.event.JoinEvent;
 import rr.event.MethodEvent;
 import rr.event.NewThreadEvent;
+import rr.event.ReleaseEvent;
 import rr.event.StartEvent;
+import rr.state.ShadowLock;
 import rr.state.ShadowThread;
 import rr.tool.Tool;
 
@@ -27,8 +30,9 @@ public class ThreadScoutTaskExecutor extends Tool {
 					return null;
 				}
 			});
+
 	static {
-		System.out.println("Static block called");
+		System.out.println("[INITIALIZATION] Thread Scout tool initialized");
 		String trace = null;
 		TSStep step = new TSStep();
 		step.setTrace(trace);
@@ -44,14 +48,12 @@ public class ThreadScoutTaskExecutor extends Tool {
 
 	public ThreadScoutTaskExecutor(String name, Tool next, CommandLine commandLine) {
 		super(name, next, commandLine);
-		System.out.println("Inside Thread Scout tool");
 	}
 
 	@Override
 	public void enter(MethodEvent me) {
 		try {
 			super.enter(me);
-			// String methodName = me.getInfo().getName();
 			String methodName = me.getInfo().getName();
 			int tid = me.getThread().getTid();
 			TSThreadDAO tsdao = tsThreads.get(me.getThread());
@@ -63,11 +65,13 @@ public class ThreadScoutTaskExecutor extends Tool {
 				TSGlobalState.printGlobalState();
 				System.out.println("[ENTER] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint");
 				BoundedSemaphore sem = TSGlobalState.lockMap.get(tsdao.getTsThreadId());
+				sem.setCompletionStatus(1);
 				sem.put("[Enter] Request for control by " + tsdao.getTsThreadId());
 				System.out.println("[ENTER] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint Completed");
 				sem.notifyPut("[ENTER] Transfer control back to controller by " + tsdao.getTsThreadId());
-				System.out.println("[EXECUTION] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint");
+				System.out.println("[EXECUTION] Thread " + tsdao.getTsThreadId() + " Thread Execution Checkpoint");
 				sem.put("[EXECUTION] Request for control by " + tsdao.getTsThreadId());
+				sem.setCompletionStatus(2);
 			}
 
 			// System.out.println("[ENTER] Extra info" + me.getInfo().);
@@ -87,15 +91,12 @@ public class ThreadScoutTaskExecutor extends Tool {
 			TSThreadDAO tsdao = tsThreads.get(me.getThread());
 			System.out.println("[EXIT] Current method name is:" + methodName + " in " + tsdao.getTsThreadId() + " by "
 					+ Thread.currentThread().getName());
-			System.out.println("[EXIT] Thread " + tsdao.getTsThreadId() + " finished its run");
-
 			if (methodName.equals("run")) {
 
 				if (tid == 0)
 					return;
 				BoundedSemaphore sem = TSGlobalState.lockMap.get(tsdao.getTsThreadId());
-				System.out.println(
-						"[EXECUTION] Thread " + tsdao.getTsThreadId() + " Thread Creation Checkpoint Completed");
+				System.out.println("[EXECUTION] Thread " + tsdao.getTsThreadId() + " Thread Execution Completed");
 				sem.notifyPut("[EXECUTION] Transfer control to controller by " + tsdao.getTsThreadId());
 				System.out.println("[EXIT] Thread " + tsdao.getTsThreadId() + " Thread Exit Checkpoint");
 				sem.put("[EXIT] Request control from controller by " + tsdao.getTsThreadId());
@@ -104,7 +105,7 @@ public class ThreadScoutTaskExecutor extends Tool {
 				sem.setCompletionStatus(4);
 				System.out.println("[EXIT] Thread " + tsdao.getTsThreadId() + " Thread Exit Checkpoint Completed");
 				sem.notifyPut("[EXIT] Transfer to controller by " + tsdao.getTsThreadId());
-				System.out.println(tsdao.getTsThreadId() + " got control ");
+				System.out.println("[POST_EXIT]" + tsdao.getTsThreadId() + " will end now");
 				if (tsdao.getTsThreadId().equals("11@1")) {
 					System.out.println("[EXIT] TS thread finished execution & waiting on QSTATE lock");
 					TSGlobalState.QStateLock.tryAndAct();
@@ -125,87 +126,98 @@ public class ThreadScoutTaskExecutor extends Tool {
 		TSThreadDAO tsdao = tsThreads.get(td);
 		System.out.println("[STOP] Thread stop called for ThreadId: " + tsdao.getTsThreadId() + "by "
 				+ Thread.currentThread().getName());
-
 	}
 
-	// @Override
-	// public void postJoin(JoinEvent je) {
-	// super.postJoin(je);
-	// // System.out.println("[POSTJOIN] Join event called for " +
-	// // je.getThread().getTid() + " by "
-	// // + Thread.currentThread().getName());
-	// // int tid = je.getJoiningThread().getTid();
-	// // if (tid == 1) {
-	// // try {
-	// // TSGlobalState.globalLock.release(2);
-	// // } catch (InterruptedException e) {
-	// // // TODO Auto-generated catch block
-	// // e.printStackTrace();
-	// // }
-	// // }
-	// }
+	@Override
+	public boolean testAcquire(AcquireEvent ae) {
+		// TODO Auto-generated method stub
+		boolean isBlocked = true;
+		int tid = ae.getThread().getTid();
+		if (tid == 0)
+			return super.testAcquire(ae);
+		TSThreadDAO tsdao = tsThreads.get(ae.getThread());
+		System.out.println("[TEST ACQUIRE] Test acquire event in " + tsdao.getTsThreadId() + " by "
+				+ Thread.currentThread().getName());
+		while (isBlocked) {
+			try {
+				System.out
+						.println("[TEST ACQUIRE] Thread " + tsdao.getTsThreadId() + " Test Acquire Checkpoint reached");
+				System.out.println("[TEST ACQUIRE] Thread waiting in test acquire loop - " + tsdao.getTsThreadId());
+				BoundedSemaphore sem = TSGlobalState.lockMap.get(tsdao.getTsThreadId());
+				sem.put("[Test Acquire] Request for control by " + tsdao.getTsThreadId());
+				System.out.println("[TEST ACQUIRE] Thread " + tsdao.getTsThreadId() + " will attempt to take lock");
+				ShadowLock lock = ae.getLock();
+				if ((lock.getHoldingThread() == null)) {
+					isBlocked = false;
+					System.out.println("[TEST ACQUIRE] Thread " + tsdao.getTsThreadId() + " can acquire lock");
+				} else {
+					sem.setCompletionStatus(3);
+					sem.notifyPut("[TEST ACQUIRE] Thread " + tsdao.getTsThreadId()
+							+ " is blocked so transfer control to controller");
+				}
 
-	// @Override
-	// public void preJoin(JoinEvent je) {
-	// // TODO Auto-generated method stub
-	// super.preJoin(je);
-	// ShadowThread t = je.getThread();
-	// TSThreadDAO tsThreadDAO = tsThreads.get(t);
-	// String tid = tsThreadDAO.getTsThreadId();
-	// System.out.println("[PREJOIN] Prejoin event called for " + tid);
-	// if (tid == "11@1") {
-	// TSGlobalState.lockMap.remove(tid);
-	// try {
-	// System.out.println("[PREJOIN} Waking up the controller");
-	// TSGlobalState.globalLock.release(0);
-	// System.out.println("[PREJOIN] Waiting on the QSTATE lock");
-	//
-	// } catch (InterruptedException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	//
-	// }
-	// }
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-	// @Override
-	// public void preStart(StartEvent se) {
-	// super.preStart(se);
-	// try {
-	// System.out.println("Pre start called for tid " + se.getThread().getTid()
-	// + " by thread : "
-	// + Thread.currentThread().getName());
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	// TODO Auto-generated method stub
-	// int tid = e.getThread().getTid();
-	// System.out.println("Inside On Create: " + tid);
-	/*
-	 * try { int pid = se.getThread().getTid(); int tid =
-	 * se.getNewThread().getTid();
-	 * System.out.println("Insid e On pre start for: " + tid); if (tid == 0)
-	 * return; System.out.println("Parent thread id is: " + pid);
-	 * TSGlobalState.printGlobalState();
-	 * System.out.println("Creating new semaphore for thread id " + tid);
-	 * BoundedSemaphore sem = new BoundedSemaphore(1, 0);
-	 * TSGlobalState.lockMap.put(String.valueOf(tid), sem);
-	 * TSGlobalState.printGlobalState(); if (tid == 0) return; if (pid == 0) {
-	 * System.out.println("Thread 1 Waking controller for the first time");
-	 * TSGlobalState.globalLock.release(0); System.out.println("Thread " + pid +
-	 * " ready to wait for first time");
-	 * TSGlobalState.lockMap.get(String.valueOf(pid)).acquire();
-	 * System.out.println("Tharead " + pid + " wokeup for the first time"); }
-	 * TSGlobalState.globalLock.release(0); System.out.println("Thread " + pid +
-	 * " ready to wait");
-	 * TSGlobalState.lockMap.get(String.valueOf(pid)).acquire();
-	 * System.out.println("Thread " + pid + " wokeup");
-	 * 
-	 * } catch (Exception ex)
-	 * 
-	 * { ex.printStackTrace(); System.out.println(ex.getMessage()); }
-	 */
-	// }
+		}
+
+		return super.testAcquire(ae);
+	}
+
+	@Override
+	public void acquire(AcquireEvent ae) {
+		// TODO Auto-generated method stub
+		super.acquire(ae);
+		try {
+			int tid = ae.getThread().getTid();
+			TSThreadDAO tsdao = tsThreads.get(ae.getThread());
+			System.out.println(
+					"[ACQUIRE] Acquire event in " + tsdao.getTsThreadId() + " by " + Thread.currentThread().getName());
+			if (tid == 0)
+				return;
+			BoundedSemaphore sem = TSGlobalState.lockMap.get(tsdao.getTsThreadId());
+			System.out.println("[ACQUIRE] Thread " + tsdao.getTsThreadId() + " Thread Acquire Checkpoint Completed");
+			sem.notifyPut("[ACQUIRE] Transfer control to controller by " + tsdao.getTsThreadId());
+			System.out.println("[EXECUTION - ACQ] Thread " + tsdao.getTsThreadId() + " Thread Execution Checkpoint");
+			sem.put("[EXECUTION - ACQ] Request for control by " + tsdao.getTsThreadId());
+			sem.setCompletionStatus(2);
+		} catch (
+
+		Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void release(ReleaseEvent re) {
+		// TODO Auto-generated method stub
+		super.release(re);
+		try {
+			int tid = re.getThread().getTid();
+			TSThreadDAO tsdao = tsThreads.get(re.getThread());
+			System.out.println(
+					"[RELEASE] Release event in " + tsdao.getTsThreadId() + " by " + Thread.currentThread().getName());
+			System.out.println("[RELEASE] Thread " + tsdao.getTsThreadId() + " will release");
+
+			if (tid == 0)
+				return;
+			TSGlobalState.printGlobalState();
+			System.out.println("[RELEASE] Thread " + tsdao.getTsThreadId() + " Thread Release Checkpoint");
+			BoundedSemaphore sem = TSGlobalState.lockMap.get(tsdao.getTsThreadId());
+			sem.setCompletionStatus(1);
+			sem.put("[RELEASE] Request for control by " + tsdao.getTsThreadId());
+			System.out.println("[RELEASE] Thread " + tsdao.getTsThreadId() + " Thread Release Checkpoint Completed");
+			sem.notifyPut("[Release] Transfer control back to controller by " + tsdao.getTsThreadId());
+			System.out.println("[EXECUTION] Thread " + tsdao.getTsThreadId() + " Thread Execution Checkpoint");
+			sem.put("[EXECUTION] Request for control by " + tsdao.getTsThreadId());
+			sem.setCompletionStatus(2);
+		} catch (
+
+		Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void create(NewThreadEvent e) {
@@ -253,39 +265,5 @@ public class ThreadScoutTaskExecutor extends Tool {
 			sem.setCompletionStatus(0);
 		}
 	}
-
-	// @Override
-	// public void preStart(StartEvent se) {
-	// // TODO Auto-generated method stub
-	// super.postStart(se);
-	// try {
-	// // System.out.println("[PRE START] Pre start called for thread id: "
-	// // + se.getThread().getTid()
-	// // + " by thread : " + Thread.currentThread().getName());
-	// // int tid = se.getThread().getTid();
-	// // TSGlobalState.printGlobalState();
-	// // if (tid == 0)
-	// // return;
-	// // System.out.println("[PRE START] Thread " + tid + " Waking
-	// // controller from pre start");
-	// // TSGlobalState.globalLock.release(0);
-	// // System.out.println("[PRESTART] Thread " + tid + " ready to wait
-	// // on");
-	// // TSGlobalState.lockMap.get(String.valueOf(tid)).acquire();
-	// // System.out.println("[PRESTART] Thread " + tid + " wokeup");
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// System.out.println(e.getMessage());
-	// }
-	// }
-
-	// @Override
-	// public void postStart(StartEvent se) {
-	// // TODO Auto-generated method stub
-	// super.postStart(se);
-	// // System.out.println(
-	// // "[POSTSTART] For Thread ID: " + se.getThread().getTid() + " by " +
-	// // Thread.currentThread().getName());
-	// }
 
 }

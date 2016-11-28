@@ -98,7 +98,7 @@ public class Instrumentor {
 	public static final CommandLineOption<Boolean> trackArraySitesOption = 
 			CommandLine.makeBoolean("arraySites", false, CommandLineOption.Kind.STABLE, "Track arrays only on given line locations.");
 
-	public static final Option<Boolean> useTestAcquireOption = new Option<Boolean>("Use TestAcquires", false);
+	public static final Option<Boolean> useTestAcquireOption = new Option<Boolean>("Use TestAcquires", true);
 
 	private static final Timer insTime = new Timer("Time", "Instrumenter");
 

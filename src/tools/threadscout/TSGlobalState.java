@@ -43,6 +43,8 @@ public class TSGlobalState {
 
 	public static boolean isQState() {
 
+		// return TSGlobalState.workQ.size() == 0;
+		System.out.println("[WORKQ LENGTH] The lenght of workQ is: " + TSGlobalState.workQ.size());
 		Set<String> keys = lockMap.keySet();
 		for (String str : keys) {
 			BoundedSemaphore sem = lockMap.get(str);
